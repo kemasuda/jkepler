@@ -1,2 +1,2 @@
 # jasmine
-jax suite for modeling interesting exoplanet and binary systems
+some jax codes for modeling exoplanet and binary systems

@@ -1,2 +1,3 @@
-# jasmine
-some jax codes for modeling exoplanet and binary systems
+# jkepler
+
+jax codes for modeling Keplerian orbits

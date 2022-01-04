@@ -1,3 +1,3 @@
 # jkepler
 
-jax codes for modeling Keplerian orbits
+jax tools for modeling Keplerian orbits

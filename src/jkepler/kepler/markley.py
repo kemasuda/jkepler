@@ -11,12 +11,14 @@ from jax.lax import scan
 #config.update('jax_enable_x64', True)
 
 #%%
+"""
 import seaborn as sns
 sns.set(style='ticks', font_scale=1.6, font='sans-serif')
 #sns.set_palette('colorblind')
 plt.rcParams["figure.figsize"] = (18,6)
 from matplotlib import rc
 rc('text', usetex=True)
+"""
 
 #%%
 """

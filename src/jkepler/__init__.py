@@ -8,3 +8,5 @@ __license__ = "MIT"
 __description__ = "jax tools for modeling Keplerian orbits"
 
 from . import kepler
+from . import rv
+from . import astrometry

@@ -10,3 +10,4 @@ __description__ = "jax tools for modeling Keplerian orbits"
 from . import kepler
 from . import rv
 from . import astrometry
+from . import transit

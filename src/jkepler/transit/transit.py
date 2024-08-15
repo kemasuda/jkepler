@@ -1,8 +1,8 @@
 
-__all__ = ["flux_loss_cosi", "flux_loss_b"]
+__all__ = ["flux_loss_cosi", "flux_loss_b", "flux_loss_cosi_map", "flux_loss_b_map"]
 
 import jax.numpy as jnp
-from jax import jit
+from jax import jit, vmap
 from ..kepler import get_ta, t0_to_tau
 from exoplanet_core.jax import ops
 
@@ -66,3 +66,50 @@ def flux_loss_b(t, t0, period, ecc, omega, b, a_over_rstar, rp_over_rstar, u1, u
     """ at least rp_over_rstar needs to be an array like t """
     cosi = b_to_cosi(b, ecc, omega, a_over_rstar)
     return flux_loss_cosi(t, t0, period, ecc, omega, cosi, a_over_rstar, rp_over_rstar, u1, u2)
+
+
+# vmap version of rsky_over_a_t0
+rsky_over_a_t0_map = vmap(rsky_over_a_t0, (None,0,0,0,0,0), 0)
+
+
+@jit
+def flux_loss_cosi_map(t, t0, period, ecc, omega, cosi, a_over_rstar, rp_over_rstar, u1, u2):
+    """compute flux loss mapping along the parameters other than time t
+
+        Args:
+            t: 1d time array (N,)
+            t0: 1d array of time of inferior conjunction (Np,)
+            period, ecc, ... should all be 1d arrays of the same shape (Np,)
+
+        Returns:
+            flux loss computed at time t, shape (Np, N)
+
+    """
+    rsky_over_a, z_sign = rsky_over_a_t0_map(t, t0, period, ecc, omega, cosi) # (Np, N)
+    rsky_over_rstar = rsky_over_a * a_over_rstar[:,None]
+    rp_over_rstar = jnp.ones_like(rsky_over_rstar) * rp_over_rstar[:,None]
+
+    soln = ops.quad_solution_vector(rsky_over_rstar, rp_over_rstar) # (Np,N,3)
+    g = jnp.array([1. - u1 - 1.5*u2, u1 + 2*u2, -0.25*u2]) # (3,Np)
+    I0 = jnp.pi * (g[0] + 2 * g[1] / 3.)  # (Np,)
+    flux_loss = jnp.sum(soln*g.T[:,None,:], axis=2) / I0[:,None] - 1. # (Np,N)
+    flux_loss = jnp.where(z_sign > 0, flux_loss, 0)
+
+    return flux_loss
+
+
+@jit
+def flux_loss_b_map(t, t0, period, ecc, omega, b, a_over_rstar, rp_over_rstar, u1, u2):
+    """compute flux loss mapping along the parameters other than time t, given b instead of cosi
+
+        Args:
+            t: 1d time array (N,)
+            t0: 1d array of time of inferior conjunction (Np,)
+            period, ecc, ... should all be 1d arrays of the same shape (Np,)
+
+        Returns:
+            flux loss computed at time t, shape (Np, N)
+
+    """
+    cosi = b_to_cosi(b, ecc, omega, a_over_rstar)
+    return flux_loss_cosi_map(t, t0, period, ecc, omega, cosi, a_over_rstar, rp_over_rstar, u1, u2)

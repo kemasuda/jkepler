@@ -1,31 +1,9 @@
 import pytest
+from jkepler.tests.read_testdata import read_testdata_rv
 from jkepler.rv import rv_unit_amplitude as getrv
 from jkepler.kepler.kepler import t0_to_tau
-import pkg_resources
-import pandas as pd
 import jax.numpy as jnp
 import numpy as np
-
-import test
-
-
-def read_testdata_rv():
-    """Read in test data for RVs
-
-    Returns:
-        jnp.array: time, rv, rv_err
-    """
-    test_rvfile = pkg_resources.resource_filename(
-        "jkepler", "data/tests/v723mon_s12_rv.csv"
-    )
-    rvdata = pd.read_csv(test_rvfile)
-    t, y, yerr = jnp.array(rvdata.BJD), jnp.array(rvdata.rv), jnp.array(rvdata.rv_err)
-    idx = t != 2454073.62965  # bad data
-    t, y, yerr = t[idx], y[idx], yerr[idx]
-    tepoch = t[0]
-    t -= tepoch
-
-    return t, y, yerr
 
 
 def _bestfit_value_rv():
@@ -71,7 +49,7 @@ def test_getrv(fig=False):
     Args:
         fig (bool, optional): If True show a plot. Defaults to False.
     """
-    t, y, yerr = read_testdata_rv()
+    t, y, yerr, tepoch = read_testdata_rv()
     K, period, ecc, omega, t0, offset = _bestfit_value_rv()
     tau = t0_to_tau(t0, period, ecc, omega)
     pred = K * getrv(t, period, ecc, omega, tau) + offset

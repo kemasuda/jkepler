@@ -6,6 +6,8 @@ import pandas as pd
 import jax.numpy as jnp
 import numpy as np
 
+import test
+
 
 def read_testdata_rv():
     """Read in test data for RVs
@@ -30,7 +32,7 @@ def _bestfit_value_rv():
     """best fit values for RVs, derived using rv.ipynb in example
     
     Returns:
-        float: K, period, ecc, omega, tau, offset
+        float: K, period, ecc, omega, t0, offset
     """
     logK = 1.82
     K = 10**logK
@@ -40,9 +42,8 @@ def _bestfit_value_rv():
     t0 = 45.69
     omega = jnp.arctan2(sinw, cosw)
     period = 59.94
-    tau = t0_to_tau(t0, period, ecc, omega)
     offset = 1.83
-    return K, period, ecc, omega, tau, offset
+    return K, period, ecc, omega, t0,  offset
 
 
 def _plot_rv(t, y, pred):
@@ -56,6 +57,13 @@ def _plot_rv(t, y, pred):
     plt.plot(t, pred)
     plt.show()
 
+def test_t0_to_tau():
+    """Test t0_to_tau function
+    """
+    K, period, ecc, omega, t0, offset = _bestfit_value_rv()
+    tau = t0_to_tau(t0, period, ecc, omega)
+    
+    assert pytest.approx(tau) == 45.16903350976443
 
 def test_getrv(fig=False):
     """Test getrv function
@@ -64,7 +72,8 @@ def test_getrv(fig=False):
         fig (bool, optional): If True show a plot. Defaults to False.
     """
     t, y, yerr = read_testdata_rv()
-    K, period, ecc, omega, tau, offset = _bestfit_value_rv()
+    K, period, ecc, omega, t0, offset = _bestfit_value_rv()
+    tau = t0_to_tau(t0, period, ecc, omega)
     pred = K * getrv(t, period, ecc, omega, tau) + offset
     if fig:
         _plot_rv(t, y, pred)
@@ -74,4 +83,6 @@ def test_getrv(fig=False):
 
 
 if __name__ == "__main__":
+    test_t0_to_tau()
     test_getrv(fig=True)
+

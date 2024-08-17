@@ -11,7 +11,7 @@ META_PATH = os.path.join("src", "jkepler", "__init__.py")
 CLASSIFIERS = [
     "Programming Language :: Python",
 ]
-INSTALL_REQUIRES = []
+INSTALL_REQUIRES = ["jax","exoplanet-core"]
 
 # END PROJECT SPECIFIC
 HERE = os.path.dirname(os.path.realpath(__file__))

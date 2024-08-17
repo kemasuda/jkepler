@@ -8,6 +8,7 @@ def read_testdata_rv():
 
 def test_getrv():
     dat = read_testdata_rv()
+    print(dat)
 
 if __name__ == '__main__':
     test_getrv()

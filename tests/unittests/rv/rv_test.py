@@ -21,10 +21,10 @@ def _bestfit_value_rv():
     omega = jnp.arctan2(sinw, cosw)
     period = 59.94
     offset = 1.83
-    return K, period, ecc, omega, t0,  offset
+    return K, period, ecc, omega, t0, offset
 
 
-def _plot_rv(t, y, pred):
+def _plot_rv(t, y, t_pred, y_pred):
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(12, 5))
@@ -32,7 +32,7 @@ def _plot_rv(t, y, pred):
     plt.xlabel("time from epoch (days)")
     plt.ylabel("radial velocity (km/s)")
     plt.plot(t, y, ".")
-    plt.plot(t, pred)
+    plt.plot(t_pred, y_pred)
     plt.show()
 
 def test_t0_to_tau():
@@ -54,7 +54,9 @@ def test_getrv(fig=False):
     tau = t0_to_tau(t0, period, ecc, omega)
     pred = K * getrv(t, period, ecc, omega, tau) + offset
     if fig:
-        _plot_rv(t, y, pred)
+        t_pred = np.linspace(t.min(), t.max(), 1000)
+        y_pred = K * getrv(t_pred, period, ecc, omega, tau) + offset
+        _plot_rv(t, y, t_pred, y_pred)
     res = np.sum((y - pred) ** 2)
 
     assert pytest.approx(res) == 37.17380922375936

@@ -1,13 +1,12 @@
 from jkepler.astrometry import xyzv_from_elements
+from jkepler.tests.read_testdata import read_testdata_astrometry
 import pytest
 import numpy as np
 import jax.numpy as jnp
-from jkepler.tests.read_testdata import read_testdata_astrometry
 
 
 def bestfit_astrometry_values():
     """Best fit values for astrometry from astrometry.ipynb"""
-
     cosL = 0.61
     cosi = -0.82
     cosw = 1.24

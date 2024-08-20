@@ -72,6 +72,14 @@ def read_testdata_transit():
     time, flux, error = np.array(data.time), np.array(data.flux), np.array(data.error)
     return time, flux, error
 
+def read_testdata_transit_koiinfo():
+    test_infofile = pkg_resources.resource_filename("jkepler", "data/tests/kic11773022_koiinfo.csv")
+    dkoi = pd.read_csv(test_infofile)
+    t0, period, b, depth, t0err, perr = np.array(dkoi[['koi_time0bk', 'koi_period', 'koi_impact', 'koi_depth', 'koi_time0bk_err1', 'koi_period_err1']]).T
+    rp_over_r = np.sqrt(depth * 1e-6)
+    rstar = dkoi.koi_srad[0]
+    return t0, period, b, rstar, rp_over_r, t0err, perr
+
 
 if __name__ == "__main__":
     t, y, yerr, tepoch = read_testdata_rv()

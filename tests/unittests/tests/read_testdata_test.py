@@ -1,4 +1,4 @@
-from jkepler.tests.read_testdata import read_testdata_rv, read_testdata_astrometry, read_testdata_transit
+from jkepler.tests.read_testdata import read_testdata_rv, read_testdata_astrometry, read_testdata_transit, read_testdata_transit_koiinfo
 import numpy as np
 import pytest
 import jax.numpy as jnp
@@ -41,5 +41,22 @@ def test_read_testdata_transit():
     assert isinstance(flux, np.ndarray)
     assert isinstance(error, np.ndarray)
 
+
+def test_read_testdata_transit_koiinfo():
+    t0, period, b, rstar, rp_over_r, t0err, perr = read_testdata_transit_koiinfo()
+
+    # Add your assertions here to validate the returned values
+    assert isinstance(t0, np.ndarray)
+    assert isinstance(period, np.ndarray)
+    assert isinstance(b, np.ndarray)
+    assert isinstance(rstar, float)
+    assert isinstance(rp_over_r, np.ndarray)
+    assert isinstance(t0err, np.ndarray)
+    assert isinstance(perr, np.ndarray)
+
+
 if __name__ == "__main__":
     test_read_testdata_rv()
+    test_read_testdata_astrometry()
+    test_read_testdata_transit()
+    test_read_testdata_transit_koiinfo()

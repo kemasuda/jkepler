@@ -1,6 +1,8 @@
 include src/jkepler/data/tests/v723mon_s12_rv.csv
 include src/jkepler/data/tests/mann19_astrometry.txt  
 include src/jkepler/data/tests/mann19_orbit.txt
+include src/jkepler/data/tests/kic11773022_koiinfo.csv	
+include src/jkepler/data/tests/kic11773022_long_transits.csv
 
 graft tests
 graft examples

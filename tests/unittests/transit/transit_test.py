@@ -28,15 +28,17 @@ Number of divergences: 0
 from jkepler.transit.transitfit import TransitFit
 from jkepler.transit.transitfit import compute_prediction
 from jkepler.tests.read_testdata import read_testdata_transit
+from jkepler.tests.read_testdata import read_testdata_transit_koiinfo
+import numpy as np
 
-def test_compute_prediction():
+def test_optimize_transit_params():
 
     time, flux, error = read_testdata_transit()
-    import matplotlib.pyplot as plt
-    plt.plot(time, flux)
-    plt.show()
-
-    #fluxmodel = TransitFit.compute_flux(t0, period, ecc, omega, b, a, rp, u1, u2)
-    
+    t0, period, b, rstar, rp_over_r, t0err, perr = read_testdata_transit_koiinfo()
+    ecc, omega = 0 * t0, 0 * t0
+    tpred = np.arange(np.min(time), np.max(time), np.median(np.diff(time))*0.2) # dense time grid
+    tf = TransitFit(time, exposure_time=29.4/1440., supersample_factor=10)
+    popt = tf.optimize_transit_params(flux, error, t0, period, ecc, omega, b, rstar, rp_over_r, fit_ttvs=False)
+    #JAXopt error python 3.10, jaxopt 0.8.2, 0.4.31
 if __name__ == "__main__":
-    test_compute_prediction()
+    test_optimize_transit_params()

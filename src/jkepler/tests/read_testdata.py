@@ -61,8 +61,20 @@ def read_testdata_astrometry(name="GJ 1005"):
 
     return mjd, sep, e_sep, pa, e_pa, xobs, yobs
 
+def read_testdata_transit():
+    """read in test data for transits
+    
+    Returns:
+        float: time, flux, error
+    """
+    test_trfile = pkg_resources.resource_filename("jkepler", "data/tests/kic11773022_long_transits.csv")
+    data = pd.read_csv(test_trfile)
+    time, flux, error = np.array(data.time), np.array(data.flux), np.array(data.error)
+    return time, flux, error
+
+
 if __name__ == "__main__":
     t, y, yerr, tepoch = read_testdata_rv()
     mjds, sep, e_sep, pa, e_pa, xobs, yobs = read_testdata_astrometry()
-
+    time, flux, error = read_testdata_transit()
     

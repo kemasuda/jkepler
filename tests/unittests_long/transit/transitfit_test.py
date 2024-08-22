@@ -24,5 +24,6 @@ def test_optimize_transit_params():
 
     assert np.allclose(popt["b"], popt_refs, atol=1e-4)
 
+
 if __name__ == "__main__":
     test_optimize_transit_params()

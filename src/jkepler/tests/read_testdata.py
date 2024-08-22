@@ -86,3 +86,26 @@ if __name__ == "__main__":
     mjds, sep, e_sep, pa, e_pa, xobs, yobs = read_testdata_astrometry()
     time, flux, error = read_testdata_transit()
     
+
+def get_popt_refs():
+    """get reference values for testdata_transit (GJ 1005)
+    
+    Returns:
+        popt_refs (dict): reference values for transit fit
+    """
+    popt_refs = {
+        "b": np.array([0.45452353, 0.99861012, 0.45813456]),
+        "ecc": np.array([0.0, 0.0, 0.0]),
+        "lna": -8.08475498,
+        "lnc": -3.43751221,
+        "lnjitter": -10.16308495,
+        "meanflux": 1.37338052e-05,
+        "omega": np.array([0.0, 0.0, 0.0]),
+        "period": np.array([45.15524184, 85.31652727, 130.17702962]),
+        "q1": 0.36,
+        "q2": 0.33333333,
+        "rp": np.array([0.07381892, 0.07379244, 0.10052868]),
+        "rstar": 0.93461991,
+        "t0": np.array([159.10729446, 295.31493438, 212.03698193]),
+    }
+    return popt_refs

@@ -101,7 +101,25 @@ class TransitFit():
 
     @partial(jit, static_argnums=(0,))
     def compute_flux(self, t0, period, ecc, omega, b, a_over_r, rp_over_r, u1, u2):
-        flux_super = np.sum(flux_loss_b(self.t_super[:,None], t0, period, ecc, omega, b, a_over_r, rp_over_r, u1, u2), axis=1)
+        """compute total flux loss due to transiting planets
+        t0, period, ..., rp_over_r should have the same shapes
+        u1, u2 should be scalers
+        
+            Args:
+                t0: times of inferior conjunction
+                period: orbital periods
+                ecc: eccentricities
+                omega: arguments of periastron
+                b: impact parameters
+                a_over_r: semi-major axes divided by stellar radius
+                rp_over_r: planet radii divded by stellar radius
+                u1, u2: limb-darkening coefficients
+
+            Returns:
+                flux loss (same shape as self.t)
+        
+        """
+        flux_super = jnp.sum(flux_loss_b(self.t_super[:,None], t0, period, ecc, omega, b, a_over_r, rp_over_r, u1, u2), axis=1)
         flux = jnp.mean(flux_super.reshape(len(self.t), self.supersample_num), axis=1)
         return flux
 

@@ -1,5 +1,5 @@
 
-__all__ = ["flux_loss_cosi", "flux_loss_b", "flux_loss_cosi_map", "flux_loss_b_map", "flux_loss_cosi_multiwav", "flux_loss_b_multiwav"]
+__all__ = ["flux_loss_cosi", "flux_loss_b", "flux_loss_cosi_map", "flux_loss_b_map", "flux_loss_cosi_multiwav", "flux_loss_b_multiwav", "flux_loss_cosi_multiwav_perturbed", "flux_loss_b_multiwav_perturbed"]
 
 import jax.numpy as jnp
 from jax import jit, vmap
@@ -118,6 +118,72 @@ def flux_loss_b_multiwav(t, t0, period, ecc, omega, b, a_over_rstar, rp_over_rst
     """
     cosi = b_to_cosi(b, ecc, omega, a_over_rstar)
     return flux_loss_cosi_multiwav(t, t0, period, ecc, omega, cosi, a_over_rstar, rp_over_rstar, u1, u2)
+
+
+@jit
+def flux_loss_cosi_multiwav_perturbed(t, t0, period, ecc, omega, cosi, a_over_rstar, rp_over_rstar, u1, u2, dx, dy, dz):
+    """compute flux loss mapping along the parameters other than time t
+    flux_loss_cosi works if u1 & u2 are common
+    dx, dy, dz are in units of semi-major axis a
+
+        Args:
+            t: 1d time array (N,)
+            t0: 1d array of time of inferior conjunction (Nwav,)
+            period, ecc, ... should all be 1d arrays of the same shape (Nwav,)
+            dx: perturbation in the radial direction (along star-planet vector) (Nwav,)
+            dz: perturbation in the normal direction (along angular momentum) (Nwav,)
+            dy: perturbation in the tangential direction (along dz x dx) (Nwav,)
+
+        Returns:
+            flux loss computed at time t, shape (N,Nwav)
+
+    """
+    tau = t0_to_tau(t0, period, ecc, omega)
+    f = get_ta(t[:,None], period, ecc, tau) # (N,Nwav)
+    omf = omega + f
+    cosof, sinof = jnp.cos(omf), jnp.sin(omf)
+    sini = jnp.sqrt(1. - cosi * cosi)
+    r = (1. - ecc * ecc) / (1. + ecc * jnp.cos(f))
+    X = cosof
+    Y = sinof * cosi
+    X += dx * cosof - dy * sinof
+    Y += dx * sinof * cosi + dy * cosof * cosi - dz * sini
+    rsky_over_a = r * jnp.sqrt(X * X + Y * Y)
+    z_sign = sinof
+
+    rsky_over_rstar = rsky_over_a * a_over_rstar[None,:]
+    rp_over_rstar = jnp.ones_like(rsky_over_rstar) * rp_over_rstar[None,:]
+
+    soln = ops.quad_solution_vector(rsky_over_rstar, rp_over_rstar) # (N,Nwav,3)
+    g = jnp.array([1. - u1 - 1.5 * u2, u1 + 2 * u2, -0.25 * u2]) # (3,Nwav)
+    I0 = jnp.pi * (g[0] + 2 * g[1] / 3.)  # (Nwav,)
+    flux_loss = jnp.sum(soln * g.T[None,:,:], axis=2) / I0[None,:] - 1. # (N,Nwav)
+    flux_loss = jnp.where(z_sign > 0, flux_loss, 0)
+
+    return flux_loss
+
+
+@jit
+def flux_loss_b_multiwav_perturbed(t, t0, period, ecc, omega, b, a_over_rstar, rp_over_rstar, u1, u2, dx, dy, dz):
+    """compute flux loss mapping along the parameters other than time t, given b instead of cosi
+    flux_loss_b works if u1 & u2 are common
+    dx, dy, dz are in units of semi-major axis a
+
+        Args:
+            t: 1d time array (N,)
+            t0: 1d array of time of inferior conjunction (Nwav,)
+            period, ecc, ... should all be 1d arrays of the same shape (Nwav,)
+            dx: perturbation in the radial direction (along star-planet vector) (Nwav,)
+            dz: perturbation in the normal direction (along angular momentum) (Nwav,)
+            dy: perturbation in the tangential direction (along dz x dx) (Nwav,)
+
+        Returns:
+            flux loss computed at time t, shape (N,Nwav)
+
+    """
+    cosi = b_to_cosi(b, ecc, omega, a_over_rstar)
+    return flux_loss_cosi_multiwav_perturbed(t, t0, period, ecc, omega, cosi, a_over_rstar, rp_over_rstar, u1, u2, dx, dy, dz)
+
 
 '''Below are vmap versions of flux_loss_*_multiwav; obsolete'''
 # vmap version of rsky_over_a_t0

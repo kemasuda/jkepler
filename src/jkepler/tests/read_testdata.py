@@ -2,7 +2,7 @@ import pandas as pd
 import pkg_resources
 import numpy as np
 import jax.numpy as jnp
-from astropy.time import Time
+
 
 def read_testdata_rv():
     """Read in test data for RVs
@@ -22,7 +22,10 @@ def read_testdata_rv():
 
     return t, y, yerr, tepoch
 
+
 def read_testdata_astrometry(name="GJ 1005"):
+    from astropy.time import Time
+
     """Read in test data for astrometry, using Mann+2019 data
     
     Args:
@@ -44,38 +47,58 @@ def read_testdata_astrometry(name="GJ 1005"):
     Returns:
         float: mjd, sep, e_sep, pa, e_pa, xobs, yobs
     """
-    test_astfile = pkg_resources.resource_filename("jkepler", "data/tests/mann19_astrometry.txt")
+    test_astfile = pkg_resources.resource_filename(
+        "jkepler", "data/tests/mann19_astrometry.txt"
+    )
 
-    data = pd.read_csv(test_astfile, delimiter='|', comment='#')
-    dates = [data.Date[i]+"T00:00:00" for i in range(len(data))]    
-    times = Time(dates, format='isot', scale='utc').mjd
-    data['MJD'] = times
+    data = pd.read_csv(test_astfile, delimiter="|", comment="#")
+    dates = [data.Date[i] + "T00:00:00" for i in range(len(data))]
+    times = Time(dates, format="isot", scale="utc").mjd
+    data["MJD"] = times
     data["Name"] = [n.strip(" ") for n in data.Name]
     didx = data.Name == name
-    
-    mjd, sep, e_sep, pa, e_pa = np.array(data[didx][["MJD", "Sep", "e_Sep", "PA", "e_PA"]]).T
-    pa *= jnp.pi/180.
-    e_pa *= jnp.pi/180.
-    xobs, yobs = sep*np.cos(pa), sep*np.sin(pa)
-    
+
+    mjd, sep, e_sep, pa, e_pa = np.array(
+        data[didx][["MJD", "Sep", "e_Sep", "PA", "e_PA"]]
+    ).T
+    pa *= jnp.pi / 180.0
+    e_pa *= jnp.pi / 180.0
+    xobs, yobs = sep * np.cos(pa), sep * np.sin(pa)
 
     return mjd, sep, e_sep, pa, e_pa, xobs, yobs
 
+
 def read_testdata_transit():
     """read in test data for transits
-    
+
     Returns:
         float: time, flux, error
     """
-    test_trfile = pkg_resources.resource_filename("jkepler", "data/tests/kic11773022_long_transits.csv")
+    test_trfile = pkg_resources.resource_filename(
+        "jkepler", "data/tests/kic11773022_long_transits.csv"
+    )
     data = pd.read_csv(test_trfile)
     time, flux, error = np.array(data.time), np.array(data.flux), np.array(data.error)
     return time, flux, error
 
+
 def read_testdata_transit_koiinfo():
-    test_infofile = pkg_resources.resource_filename("jkepler", "data/tests/kic11773022_koiinfo.csv")
+    test_infofile = pkg_resources.resource_filename(
+        "jkepler", "data/tests/kic11773022_koiinfo.csv"
+    )
     dkoi = pd.read_csv(test_infofile)
-    t0, period, b, depth, t0err, perr = np.array(dkoi[['koi_time0bk', 'koi_period', 'koi_impact', 'koi_depth', 'koi_time0bk_err1', 'koi_period_err1']]).T
+    t0, period, b, depth, t0err, perr = np.array(
+        dkoi[
+            [
+                "koi_time0bk",
+                "koi_period",
+                "koi_impact",
+                "koi_depth",
+                "koi_time0bk_err1",
+                "koi_period_err1",
+            ]
+        ]
+    ).T
     rp_over_r = np.sqrt(depth * 1e-6)
     rstar = dkoi.koi_srad[0]
     return t0, period, b, rstar, rp_over_r, t0err, perr
@@ -85,11 +108,11 @@ if __name__ == "__main__":
     t, y, yerr, tepoch = read_testdata_rv()
     mjds, sep, e_sep, pa, e_pa, xobs, yobs = read_testdata_astrometry()
     time, flux, error = read_testdata_transit()
-    
+
 
 def get_popt_refs():
     """get reference values for testdata_transit (GJ 1005)
-    
+
     Returns:
         popt_refs (dict): reference values for transit fit
     """

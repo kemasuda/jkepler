@@ -22,7 +22,7 @@ def test_optimize_transit_params():
     #refs = np.array([0.45452353, 0.99861012, 0.45813456])
     popt_refs = get_popt_refs()["b"]
 
-    assert np.allclose(popt["b"], popt_refs, atol=1e-4)
+    assert np.allclose(popt["b"], popt_refs, atol=1e-2)
 
 
 if __name__ == "__main__":

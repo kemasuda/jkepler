@@ -38,7 +38,7 @@ if __name__ == "__main__":
             "write_to": os.path.join("src", "jkepler", "{0}_version.py".format(NAME)),
             "write_to_template": '__version__ = "{version}"\n',
         },
-        version="0.0.1",
+        version="0.1.0",
         author=find_meta("author"),
         author_email=find_meta("email"),
         maintainer=find_meta("author"),
